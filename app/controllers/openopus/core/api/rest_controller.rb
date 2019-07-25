@@ -28,7 +28,7 @@
 #    - by default will render /openopus/core/api/people/_person with person and @collection = false;
 # 
 
-module Openopusp
+module Openopus
   module Core
     module Api
       class RestController < BaseController

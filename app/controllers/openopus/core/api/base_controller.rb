@@ -7,11 +7,17 @@ module Openopus
   module Core
     module Api
       class BaseController < ::ApplicationController
+        before_action :load_config_params
         before_action :cors_set_access_control_headers
         before_action :cors_preflight_check
         before_action :api_setup
 
         rescue_from ActiveRecord::RecordNotFound, with: :render_404
+
+        def load_config_params
+          @token_name = Openopus::Core::Api.config.token_name
+          @token_name = "api-token"
+        end
         
         def options
         end
@@ -50,7 +56,6 @@ module Openopus
           @action = params[:action]
           @controller = params[:controller]
           @arguments = params[:rest]
-          @token_name = Openopus::Core::Api.config.token_name
 
           @authenticated = Openopus::Core::Api.config.authenticate_request(request: @request, params: @params)
         end

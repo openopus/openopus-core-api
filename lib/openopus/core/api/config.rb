@@ -10,6 +10,9 @@ module Openopus
         DEFAULT_ERROR_TRANSFORM = proc { |hash| hash }
 
         class << self
+
+          token_name = "oo-api-token"
+
           # session_authentication_method specifies the method to call in order
           # to authenticate the incoming request.  The method called
           # will be passed a hash containing :request and :params,

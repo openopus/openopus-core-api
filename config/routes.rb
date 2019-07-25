@@ -1,7 +1,8 @@
 Openopus::Core::Api::Engine.routes.draw do
-  namespace :openopus:core:api, :path => "/",defaults: { format: 'json' } do
-    match '*path' => "base#options", :via => [:options]
+  scope format: false, defaults: { format: 'json' } do
+    match '*path' => "openopus/core/api/base#options", :via => [:options]
   
+    # Authentication routes (which will be removed).
     namespace "authentication" do 
       get 'facebook' 
       post 'facebook'
@@ -16,13 +17,15 @@ Openopus::Core::Api::Engine.routes.draw do
       post 'recover_password'
     end
 
-    get    'version'                    => 'misc#version'
-    get    'whoami'                     => 'misc#whoami'
+    # Miscellaneous routes.
+    get    'version'                    => 'openopus/core/api/misc#version'
+    get    'whoami'                     => 'openopus/core/api/misc#whoami'
 
-    get    '(:namespace/):model/:id'    => 'rest#read',    constraints: { id: /(\h|-)*/, model: /\D+/ }
-    match  '(:namespace/):model/:id'    => 'rest#update',  constraints: { id: /(\h|-)*/, model: /\D+/ }, via: [:post, :put, :patch]
-    delete '(:namespace/):model(/:id)'  => 'rest#destroy', constraints: { id: /(\h|-)*/, model: /\D+/ }
-    get    '(:namespace/):model'        => 'rest#index',   constraints: { id: /(\h|-)*/, model: /\D+/ }
-    post   '(:namespace/):model'        => 'rest#create',  constraints: { id: /(\h|-)*/, model: /\D+/ }
+    # RESTful API routes.
+    get    '(:namespace/):model/:id'    => 'openopus/core/api/rest#read',    constraints: { id: /(\h|-)*/, model: /\D+/ }
+    match  '(:namespace/):model/:id'    => 'openopus/core/api/rest#update',  constraints: { id: /(\h|-)*/, model: /\D+/ }, via: [:post, :put, :patch]
+    delete '(:namespace/):model(/:id)'  => 'openopus/core/api/rest#destroy', constraints: { id: /(\h|-)*/, model: /\D+/ }
+    get    '(:namespace/):model'        => 'openopus/core/api/rest#index',   constraints: { model: /\D+/ }
+    post   '(:namespace/):model'        => 'openopus/core/api/rest#create',  constraints: { model: /\D+/ }
   end
 end

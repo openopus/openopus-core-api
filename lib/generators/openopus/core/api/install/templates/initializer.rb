@@ -4,6 +4,10 @@
 #  Author: Brian J. Fox (bfox@opuslogica.com)
 #  Birthdate: Sun Jul 21 12:19:34 2019.
 Openopus::Core::Api.config do |config|
+  # token_name is the name that you wish to use to pass the token back and forth to your server.  By default the tag is
+  # 'oo-api-token'.  This name can either appear as a passed parameter, or as an HTTP header.
+  config.token_name = 'oo-api-token'
+  
   # authorize_with specifies the block to use to determine whether
   # a certain user is authorized to perform an action on a
   # resource.
