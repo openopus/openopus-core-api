@@ -11,18 +11,19 @@ module Openopus
 
         class << self
 
-          token_name = "oo-api-token"
+          # token_name is the name that you wish to use to pass the
+          # token back and forth to your server.  By default the tag
+          # is 'oo-api-token'.  This name can either appear as a
+          # passed parameter, or as an HTTP header.
+          mattr_accessor :token_name
 
-          # session_authentication_method specifies the method to call in order
-          # to authenticate the incoming request.  The method called
-          # will be passed a hash containing :request and :params,
-          # which are the controller request and params objects.
-          # This function should return
-          # that represents the authenticated user.
-          def session_authentication_method(sym=nil)
-            @session_authentication_method = sym if sym
-            @session_authentication_method
-          end
+          # request_authenticator contains the actual method to
+          # call in order to authenticate the incoming request.  The
+          # method called will be passed a hash containing :request
+          # and :params, which are the controller request and params
+          # objects.  The called method should return an object that
+          # represents the authenticated user.
+          mattr_accessor :request_authenticator
 
           # authorize_with specifies the block to use to determine whether
           # a certain user is authorized to perform an action on a

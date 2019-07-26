@@ -50,6 +50,10 @@ module Openopus
           Openopus::Core::Api.config.authorize_with.call(@authenticated, action, resource)
         end
 
+        def self.promiscuous_authenticator(options)
+          true
+        end
+
         def api_setup
           @request = request
           @params = params
@@ -57,7 +61,7 @@ module Openopus
           @controller = params[:controller]
           @arguments = params[:rest]
 
-          @authenticated = Openopus::Core::Api.config.authenticate_request(request: @request, params: @params)
+          @authenticated = Openopus::Core::Api.config.request_authenticator.call({ request: @request, params: @params })
         end
 
         def render_error(error_code, extra_hash_members={})
