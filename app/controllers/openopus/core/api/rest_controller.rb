@@ -1,18 +1,19 @@
 # rest_controller.rb: -*- Ruby -*-  DESCRIPTIVE TEXT.
 # 
-#  Copyright (c) 2019 Brian J. Fox Opus Logica, Inc.
-#  Author: Brian J. Fox (bfox@opuslogica.com)
-#  Birthdate: Sun Jul 21 12:53:50 2019.
+# Copyright (c) 2019 Brian J. Fox Opus Logica, Inc.
+# Author: Dan Staudigel (dstaudigel@gmail.com) and Brian J. Fox (bfox@opuslogica.com)
+# Second Birthdate: Sun Jul 21 12:53:50 2019.
 #
 # This controller provides basic REST operations on any given
 # model.  Model-specific assignment behavior can be customized by
 # overriding the assign_attributes in that model.  View/JSON
-# customization can be done using the as_json function, but this
-# doesn't have the ideal level of flexibility.  For example, how would
-# one render a record with limited fields for collection views and
-# more comprehensive rows for individual retrieval?  This
-# customization is done using view-level rendering.  Here is the
-# process by which view paths/partials are selected:
+# customization can be done using the as_api_json function, or the
+# as_json function, but this doesn't have the ideal level of
+# flexibility.  For example, how would one render a record with
+# limited fields for collection views and more comprehensive rows for
+# individual retrieval?  This customization is done using view-level
+# rendering.  Here is the process by which view paths/partials are
+# selected:
 #
 # Collection-like requests:
 #  - multiple-row-requests (/api/v1/people?ids=34,23,2)
@@ -91,10 +92,13 @@ module Openopus
 
           options = { authenticated: @authenticated, include: include }
           options[:deep] = true if @deep
-          h = m.as_json(options)
-          if m.errors.keys
-            h[:errors] = m.errors.messages
+          if m.respond_to?(:as_api_json)
+            h = m.as_api_json(options)
+          else
+            options[:for_api] = true
+            h = m.as_json(options)
           end
+          (h[:errors] = m.errors.messages if not m.errors.messages.blank?) rescue nil
           h
         end
         
@@ -120,7 +124,7 @@ module Openopus
               meta[:total] = data.length
             end
 
-            meta = data.collect { |m| render_one_json m }
+            meta = data.collect { |m| render_one_json(m) }
             render(json: meta)
           else
             return if render_one(data)
@@ -257,7 +261,7 @@ module Openopus
 
           render_error(ApiError::UNAUTHORIZED) and return false unless authorized?(:read, @instance)
 
-          render_json @instance
+          render_json(@instance)
         end
 
         def create
@@ -321,7 +325,7 @@ module Openopus
             end
           end
           
-          render json: { success: true }
+          render(json: { success: true })
         end
       end
     end
