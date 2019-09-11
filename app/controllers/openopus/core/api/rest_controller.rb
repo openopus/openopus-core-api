@@ -291,9 +291,9 @@ module Openopus
 
         def update
           @instance = @model.unscoped.find(params[:id])
-          params.keys.each {|k| params.permit(k) }
-          hash = JSON.parse(request.raw_post) rescue nil
-          hash ||= params
+
+          # BYPASS THE BLOODY STRONG PARAMETERS.
+          hash = request.params
           hash = hash.to_hash.with_indifferent_access
           hash.delete(:controller) if hash.has_key?(:controller)
           hash.delete(:action) if hash.has_key?(:action)
@@ -301,7 +301,7 @@ module Openopus
           hash.delete(:id) if hash.has_key?(:id)
 
           assignable = {}
-          hash.keys.each { |k| assignable[k] = hash[k] if @instance.respond_to?(k) }
+          hash.keys.each { |k| assignable[k] = hash[k] if @instance.respond_to?((k.to_s + "=").to_sym) }
           assign_instance_attributes(assignable)
 
           render_error(ApiError::UNAUTHORIZED) and return false unless authorized?(:update, @instance)
