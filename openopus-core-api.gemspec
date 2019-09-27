@@ -7,15 +7,17 @@ require "openopus/core/api/version"
 Gem::Specification.new do |spec|
   spec.name        = "openopus-core-api"
   spec.version     = Openopus::Core::Api::VERSION
-  spec.authors     = ["Brian J. Fox", "Daniel Staudigel", "Khrystle Dunn"]
-  spec.email       = ["bfox@opuslogica.com", "krae@opuslogica.com"]
-  spec.homepage    = "https://github.com/opuslogica/openopus-core-api"
-  spec.summary     = "Zeroconf customizable RESTful API CRUDs your DB."
-  spec.description = "RESTful API server easily configurable authentication delivers API automagically."
-  spec.license     = "MIT"
+  spec.authors     = ["William Berman"]
+  spec.email       = ["wlbberman@opuslogica.com"]
+  spec.homepage    = "https://www.opuslogica.com"
+  spec.summary     = "A configurable api server"
+  spec.description = "A configurable api server"
+  spec.license     = "AGPLv3"
 
+  # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
+  # to allow pushing to a single host or delete this section to allow pushing to any host.
   if spec.respond_to?(:metadata)
-    spec.metadata["allowed_push_host"] = "https://rubygems.org"
+    spec.metadata["allowed_push_host"] = "TODO: Set to 'http://mygemserver.com'"
   else
     raise "RubyGems 2.0 or newer is required to protect against " \
       "public gem pushes."

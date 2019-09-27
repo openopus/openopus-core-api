@@ -1,12 +1,24 @@
 # Openopus::Core::Api
-This enging delivers a RoR Gem that creates a complete and featureful RESTful API for your existing database.  Installing it for the most basic use takes 10 seconds.
-
-After installation, you have an unsecured RESTful API for your existing database.  The entire way in which this was built is non-invasive, and doesn't require code modification - uninstalling it is as simple as removing the gem and single added route.
-
-To secure and modify the behavior of the API, you will provide your own authentication methods.  An example of how to do this appears below.
-
+Define CRUD endpoints via configuration in an extensible manner
 
 ## Usage
+All APIs are defined under `./app/apis/`.
+
+In ./app/apis/describe_the_group_of_endpoints.rb
+```ruby
+class AGroupOfEndpoints < Openopus::Core::Api::BaseApi
+  on '/the_base_extension' do
+    expose User route: '/the_user_route', query_by: ['name']
+  end
+end
+```
+
+Now a set of REST endpoints will be define on `/the_base_extension/the_user_route` with query parameters restricted to `name`.
+
+Additionally, a set of analogous GraphQL endpoints will be defined on `/graphql`. These can be inspected on development by navigating to `/graphiql`
+
+
+## Installation
 Add this line to your application's Gemfile:
 
 ```ruby
@@ -23,19 +35,8 @@ Or install it yourself as:
 $ gem install openopus-core-api
 ```
 
-Then:
-
-```bash
-  $ bundle exec rails generate openopus:core:api:install
-  $ bundle install --path=vendor
-```
-
 ## Contributing
-Send us a pull request, and we promise to read it!
+Contribution directions go here.
 
 ## License
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
-
-
-
-

@@ -1,31 +1,34 @@
-Openopus::Core::Api::Engine.routes.draw do
-  scope format: false, defaults: { format: 'json' } do
-    match '*path' => "openopus/core/api/base#options", :via => [:options]
-  
-    # Authentication routes (which will be removed).
-    namespace "authentication" do 
-      get 'facebook' 
-      post 'facebook'
-      get 'login'
-      post 'login'
-      get 'signup'
-      post 'signup'
-      get 'logout'
-      post 'logout'
-      post 'change_password'
-      post 'reset_password'
-      post 'recover_password'
+Rails.application.routes.draw do
+  Dir.glob(Rails.root.join('app', 'apis', '*.rb')) do |api_file|
+    p "requiring api file #{api_file}"
+    require Rails.root.join('app', 'apis', api_file)
+  end
+
+  Openopus::Core::Api::BaseApi.exposed.each do |route, opts|
+    available_actions = opts[:available_actions]
+
+    if available_actions.include? :create
+      post   "#{route}"     => 'rest#create'  , defaults: opts
     end
 
-    # Miscellaneous routes.
-    get    'version'                    => 'openopus/core/api/misc#version'
-    get    'whoami'                     => 'openopus/core/api/misc#whoami'
+    if available_actions.include? :read
+      get    "#{route}"     => 'rest#index'   , defaults: opts
+      get    "#{route}/:id" => 'rest#show'    , defaults: opts
+    end
 
-    # RESTful API routes.
-    get    '(:namespace/):model/:id'    => 'openopus/core/api/rest#read',    constraints: { id: /(\h|-)*/, model: /\D+/ }
-    match  '(:namespace/):model/:id'    => 'openopus/core/api/rest#update',  constraints: { id: /(\h|-)*/, model: /\D+/ }, via: [:post, :put, :patch]
-    delete '(:namespace/):model(/:id)'  => 'openopus/core/api/rest#destroy', constraints: { id: /(\h|-)*/, model: /\D+/ }
-    get    '(:namespace/):model'        => 'openopus/core/api/rest#index',   constraints: { model: /\D+/ }
-    post   '(:namespace/):model'        => 'openopus/core/api/rest#create',  constraints: { model: /\D+/ }
+    if available_actions.include? :update
+      put    "#{route}/:id" => 'rest#update'  , defaults: opts
+      patch  "#{route}/:id" => 'rest#update'  , defaults: opts
+    end
+
+    if available_actions.include?(:delete) or available_actions.include?(:destroy)
+      delete "#{route}/:id" => 'rest#destroy' , defaults: opts
+    end
+  end
+
+  post "/graphql", to: "graphql#execute"
+
+  if Rails.env.development?
+    mount GraphiQL::Rails::Engine, at: "/graphiql", graphql_path: "/graphql"
   end
 end
