@@ -10,7 +10,26 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_09_24_211321) do
+ActiveRecord::Schema.define(version: 2019_09_27_030532) do
+
+  create_table "administrates", force: :cascade do |t|
+    t.integer "administrator_id"
+    t.integer "recipient_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["administrator_id"], name: "index_administrates_on_administrator_id"
+    t.index ["recipient_id"], name: "index_administrates_on_recipient_id"
+  end
+
+  create_table "employments", force: :cascade do |t|
+    t.integer "organization_id"
+    t.integer "user_id"
+    t.string "job_title"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_employments_on_organization_id"
+    t.index ["user_id"], name: "index_employments_on_user_id"
+  end
 
   create_table "organizations", force: :cascade do |t|
     t.string "name"
@@ -18,6 +37,40 @@ ActiveRecord::Schema.define(version: 2019_09_24_211321) do
     t.decimal "longitude"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "regions", force: :cascade do |t|
+    t.string "name"
+    t.integer "organization_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_regions_on_organization_id"
+  end
+
+  create_table "station_roles", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "station_id"
+    t.string "job_title"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["station_id"], name: "index_station_roles_on_station_id"
+    t.index ["user_id"], name: "index_station_roles_on_user_id"
+  end
+
+  create_table "stations", force: :cascade do |t|
+    t.string "name"
+    t.integer "region_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["region_id"], name: "index_stations_on_region_id"
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.string "name"
+    t.string "email"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "role"
   end
 
 end

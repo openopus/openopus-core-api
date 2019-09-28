@@ -17,3 +17,37 @@ if ActiveSupport::TestCase.respond_to?(:fixture_path=)
   ActiveSupport::TestCase.file_fixture_path = ActiveSupport::TestCase.fixture_path + "/files"
   ActiveSupport::TestCase.fixtures :all
 end
+
+
+# Attempt to mimic behavior of the below
+# https://jestjs.io/docs/en/expect#tomatchobjectobject
+# TODO add propper error messages
+def assert_match_object actual, expected
+  if actual.class == Array and expected.class == Array
+    assert actual.length == expected.length
+    actual.zip(expected).each do |ac, ex|
+      assert_match_object ac, ex
+    end
+  elsif actual.class == Hash and expected.class == Hash
+    expected.keys.each do |k|
+      assert expected[k] == actual[k]
+    end
+  else
+    raise ArgumentError.new("#{actual} and #{expected} must either both be Array's or Hash's")
+  end
+end
+
+
+# For some reason the standard assert_throws isn't catching correctly
+def assert_throws2 sym, msg = nil
+  caught = nil
+
+  begin
+    yield
+    caught = false
+  rescue sym
+    caught = true
+  end
+
+  assert caught, message(msg) { default }
+end

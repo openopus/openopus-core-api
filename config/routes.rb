@@ -1,6 +1,5 @@
 Rails.application.routes.draw do
   Dir.glob(Rails.root.join('app', 'apis', '*.rb')) do |api_file|
-    p "requiring api file #{api_file}"
     require Rails.root.join('app', 'apis', api_file)
   end
 

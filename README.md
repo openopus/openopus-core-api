@@ -15,7 +15,7 @@ end
 
 Now a set of REST endpoints will be define on `/the_base_extension/the_user_route` with query parameters restricted to `name`.
 
-Additionally, a set of analogous GraphQL endpoints will be defined on `/graphql`. These can be inspected on development by navigating to `/graphiql`
+Additionally, a set of analogous GraphQL endpoints will be defined on `/graphql`. In development, these can be inspected on development by navigating to `/graphiql`.
 
 
 ## Installation
