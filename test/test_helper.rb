@@ -21,7 +21,6 @@ end
 
 # Attempt to mimic behavior of the below
 # https://jestjs.io/docs/en/expect#tomatchobjectobject
-# TODO add propper error messages
 def assert_match_object actual, expected
   if actual.class == Array and expected.class == Array
     assert actual.length == expected.length
@@ -30,7 +29,9 @@ def assert_match_object actual, expected
     end
   elsif actual.class == Hash and expected.class == Hash
     expected.keys.each do |k|
-      assert expected[k] == actual[k]
+      ex = expected[k]
+      ac = actual[k]
+      assert_equal ex, ac, "#{k}: #{ex} #{ac}"
     end
   else
     raise ArgumentError.new("#{actual} and #{expected} must either both be Array's or Hash's")
