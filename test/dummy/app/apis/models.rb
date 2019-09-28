@@ -22,6 +22,7 @@ class ModelsApi < Openopus::Core::Api::BaseApi
 
     expose Organization,
            available_actions: [:read, :update],
+           query_by: [:name, :id],
            permissions: OrganizationPermissions,
            credential: credential
 

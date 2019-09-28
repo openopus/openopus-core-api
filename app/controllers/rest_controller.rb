@@ -11,10 +11,12 @@ class RestController < ApplicationController
                  .slice(*available_query_parameters)
                  .permit(*available_query_parameters)
 
-    render json: application_record
-             .where(query_by)
-             .select { |resource| permissions.read(credential: credential, resource: resource) }
-             .map { |resource| serializer(resource) }
+    resources = application_record
+                  .where(query_by)
+                  .select { |resource| permissions.read(credential: credential, resource: resource) }
+                  .map { |resource| serializer(resource) }
+
+    render json: resources
   end
 
   def create
