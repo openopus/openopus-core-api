@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     openopus-core-api (0.1.0)
+      graphql
       rails (~> 5.2.3)
 
 GEM
@@ -127,7 +128,6 @@ PLATFORMS
 DEPENDENCIES
   byebug
   graphiql-rails
-  graphql
   openopus-core-api!
   sqlite3
 

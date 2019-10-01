@@ -14,5 +14,4 @@ gemspec
 # To use a debugger
 gem 'byebug', group: [:development, :test]
 
-gem 'graphql'
 gem "graphiql-rails", group: [:development]
