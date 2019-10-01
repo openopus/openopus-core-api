@@ -110,7 +110,7 @@ class RestController < ApplicationController
   end
 
   def serializer resource
-    params[:serializer].call(resource)
+    params[:serializer].call(resource: resource, request: request)
   end
 
   def available_query_parameters

@@ -139,7 +139,9 @@ module Openopus
 
           serializer ||= (
             @@default_options[:serializer] or
-            Proc.new { |resource|
+            Proc.new { |**opts|
+              resource = opts[:resource]
+
               application_record.column_names
                 .map { |column_name| [column_name, resource.send(column_name)] }
                 .to_h
