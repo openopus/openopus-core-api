@@ -2,10 +2,15 @@ module Openopus
   module Core
     module Api
       module Permissions
+
+        # destroy and delete are interchangeable terms
         class BasePermissions
           def self.destroy(credential:, resource:)
-            # destroy and delete are interchangeable terms
             self.delete credential: credential, resource: resource
+          end
+
+          def self.delete(credential:, resource:)
+            self.destroy credential: credential, resource: resource
           end
         end
 

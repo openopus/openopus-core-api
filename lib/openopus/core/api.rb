@@ -8,6 +8,7 @@ module Openopus
         @@exposed = {}
         @@on_extension = nil
         @@default_extension = nil
+        @@default_options = {}
         @@graph_ql_types = {}
         @@graph_ql_mutation_response_types = {}
 
@@ -25,14 +26,19 @@ module Openopus
           @@default_extension = extension
         end
 
-        def self.on extension
-          # Every exposed endpoint in the given block will
-          # be mounted on extension instead of the default mount
-          # point
+        # Every exposed endpoint in the given block will be mounted on extension
+        # instead of the default mount point
+        #
+        # Any given keyword arguments will be used as the default values
+        # for the configuration arguments in exposed routes in the given
+        # block
+        def self.on extension, **opts
           @@on_extension = extension
+          @@default_options = opts
           yield
         ensure
           @@on_extension = nil
+          @@default_options = {}
         end
 
 
@@ -74,6 +80,33 @@ module Openopus
         end
 
 
+        # Expose the given application record as a route on this defined api
+        #
+        # route defaults to the downcase version of the given class
+        #   on 'test_api' { expose User }
+        #   Users are queriable via 'test_api/user'
+        #
+        # credential is a Proc that takes the request from the controller and returns
+        #   an object that may be used to determine access. It must be compatible
+        #   with the given permissions.
+        #   defaults to returning nil
+        #
+        # permissions will default to all OpenPermissions in a non production environment
+        #   and will default to ClosedPermissions in production
+        #
+        # serializer is a Proc that returns a dict representation of a resource
+        #   and will default to reflecting on the record and getting all columns
+        #
+        # query_by will default to reflecting on the record and getting all columns
+        #   note that this gets you look up of multiple values for free by encoding the parameter as an array
+        #   ?id[]=1&id[]=2 will be parsed by rails as a parameter of id = ["1", "2"]
+        #
+        # available_mutation_parameters will default to reflecting on the record and getting all columns except the id
+        #
+        # available_actions indicates which routes will be exposed via the symbols :create, :read, :update, :delete/:destroy.
+        #   :delete and :destroy are interchangeable
+        #   Defaults to all available.
+        #   see config/routes.rb for how the symbols coorespond to the exposed routes.
         def self.expose application_record,
                         route: nil,
                         credential: nil,
@@ -82,57 +115,42 @@ module Openopus
                         query_by: nil,
                         available_mutation_parameters: nil,
                         available_actions: nil
-          # Expose the given application record as a route on this defined api
-          #
-          # route defaults to the downcase version of the given class
-          #   on 'test_api' { expose User }
-          #   Users are queriable via 'test_api/user'
-          #
-          # credential is a Proc that takes the request from the controller and returns
-          #   an object that may be used to determine access. It must be compatible
-          #   with the given permissions.
-          #   defaults to returning nil
-          #
-          # permissions will default to all OpenPermissions in a non production environment
-          #   and will default to ClosedPermissions in production
-          #
-          # serializer is a Proc that returns a dict representation of a resource
-          #   and will default to reflecting on the record and getting all columns
-          #
-          # query_by will default to reflecting on the record and getting all columns
-          #   note that this gets you look up of multiple values for free by encoding the parameter as an array
-          #   ?id[]=1&id[]=2 will be parsed by rails as a parameter of id = ["1", "2"]
-          #
-          # available_mutation_parameters will default to reflecting on the record and getting all columns except the id
-          #
-          # available_actions indicates which routes will be exposed via the symbols :create, :read, :update, :delete/:destroy.
-          #   :delete and :destroy are interchangeable
-          #   Defaults to all available.
-          #   see config/routes.rb for how the symbols coorespond to the exposed routes.
+
+          route ||= application_record.to_s.downcase
+
+
+          query_by ||= (@@default_options[:query_by] or application_record.column_names)
+
+
+          available_mutation_parameters ||= (
+            @@default_options[:available_mutation_parameters] or
+            application_record.column_names.select { |s| s != 'id' })
+
+
+          available_actions ||= (
+            @@default_options[:available_actions] or
+            [:create, :read, :update, :delete])
+
+
+          credential ||= (
+            @@default_options[:credential] or
+            Proc.new { |request| nil })
+
+
+          serializer ||= (
+            @@default_options[:serializer] or
+            Proc.new { |resource|
+              application_record.column_names
+                .map { |column_name| [column_name, resource.send(column_name)] }
+                .to_h
+            })
+
+
+          permissions ||= default_permissions
+
 
           extension = (@@on_extension or @@default_mount or '')
-          route ||= application_record.to_s.downcase
           full_route = "#{extension}/#{route}"
-
-          credential ||= Proc.new { |request| nil }
-
-          if not permissions
-            if Rails.env == 'production'
-              permissions = Permissions::ClosedPermissions
-            else
-              permissions = Permissions::OpenPermissions
-            end
-          end
-
-          serializer ||= Proc.new { |resource|
-            application_record.column_names
-              .map { |column_name| [column_name, resource.send(column_name)] }
-              .to_h
-          }
-
-          query_by ||= application_record.column_names
-          available_mutation_parameters ||= application_record.column_names.select { |s| s != 'id' }
-          available_actions ||= [:create, :read, :update, :delete]
 
           @@exposed[full_route] = {
             application_record: application_record,
@@ -144,6 +162,18 @@ module Openopus
             credential: credential
           }
         end
+
+        private
+        def self.default_permissions
+          if @@default_options[:permissions]
+            @@default_options[:permissions]
+          elsif Rails.env == 'production'
+            Permissions::ClosedPermissions
+          else
+            Permissions::OpenPermissions
+          end
+        end
+
       end
     end
   end
